@@ -1,0 +1,224 @@
+{
+ "info": {
+  "name": "NYC Marriage Index (Reclaim The Records)",
+  "description": "Unofficial collection. (1) nycmarriageindex.com, 1950–2017 City Clerk licenses: public Solr endpoint /solrsearch/ (JSON). (2) 1908–1929 City Clerk index books, scanned page images on the Internet Archive (collection nycmarriageindex, items NYC_Marriage_Index_<Borough>_<Year>), reachable through the IA search, metadata and IIIF APIs. No key needed. The 1908–1929 books list grooms (left) and brides (right) separately, grouped by the first two letters of the surname and cycling through the year by date; each line gives the license number.",
+  "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+ },
+ "variable": [
+  {
+   "key": "nycmi",
+   "value": "https://www.nycmarriageindex.com"
+  },
+  {
+   "key": "ia",
+   "value": "https://archive.org"
+  },
+  {
+   "key": "iiif",
+   "value": "https://iiif.archive.org"
+  },
+  {
+   "key": "item",
+   "value": "NYC_Marriage_Index_Manhattan_1914"
+  },
+  {
+   "key": "surname",
+   "value": "SMITH"
+  }
+ ],
+ "item": [
+  {
+   "name": "Solr – either spouse by surname (1950–2017)",
+   "request": {
+    "method": "GET",
+    "header": [],
+    "url": {
+     "raw": "{{nycmi}}/solrsearch/?q=record_surnames_spouse1:{{surname}} OR record_surnames_spouse2:{{surname}} OR record_surnames_bmpm_spouse1:{{surname}} OR record_surnames_bmpm_spouse2:{{surname}}&wt=json&rows=50&start=0",
+     "host": [
+      "{{nycmi}}"
+     ],
+     "path": [
+      "solrsearch"
+     ],
+     "query": [
+      {
+       "key": "q",
+       "value": "record_surnames_spouse1:{{surname}} OR record_surnames_spouse2:{{surname}} OR record_surnames_bmpm_spouse1:{{surname}} OR record_surnames_bmpm_spouse2:{{surname}}",
+       "description": "bmpm fields are Beider-Morse phonetic variants"
+      },
+      {
+       "key": "wt",
+       "value": "json",
+       "description": ""
+      },
+      {
+       "key": "rows",
+       "value": "50",
+       "description": ""
+      },
+      {
+       "key": "start",
+       "value": "0",
+       "description": ""
+      }
+     ]
+    },
+    "description": "Returns response.numFound and docs with GROOM_SURNAME, GROOM_FIRST_NAME, BRIDE_SURNAME, BRIDE_FIRST_NAME, LICENSE_YEAR, LICENSE_BOROUGH_ID, LICENSE_SEQ (license number), record_id."
+   },
+   "response": []
+  },
+  {
+   "name": "Solr – groom and bride, filtered by year and borough",
+   "request": {
+    "method": "GET",
+    "header": [],
+    "url": {
+     "raw": "{{nycmi}}/solrsearch/?q=GROOM_SURNAME:{{surname}}&fq=LICENSE_YEAR:1975&wt=json&rows=50",
+     "host": [
+      "{{nycmi}}"
+     ],
+     "path": [
+      "solrsearch"
+     ],
+     "query": [
+      {
+       "key": "q",
+       "value": "GROOM_SURNAME:{{surname}}",
+       "description": ""
+      },
+      {
+       "key": "fq",
+       "value": "LICENSE_YEAR:1975",
+       "description": "Filter query; repeat fq for LICENSE_BOROUGH_ID:Manhattan"
+      },
+      {
+       "key": "wt",
+       "value": "json",
+       "description": ""
+      },
+      {
+       "key": "rows",
+       "value": "50",
+       "description": ""
+      }
+     ]
+    },
+    "description": "Exact-field search with filter queries."
+   },
+   "response": []
+  },
+  {
+   "name": "IA – list 1908–1929 index volumes",
+   "request": {
+    "method": "GET",
+    "header": [],
+    "url": {
+     "raw": "{{ia}}/advancedsearch.php?q=collection:nycmarriageindex&fl[]=identifier&fl[]=title&rows=300&output=json",
+     "host": [
+      "{{ia}}"
+     ],
+     "path": [
+      "advancedsearch.php"
+     ],
+     "query": [
+      {
+       "key": "q",
+       "value": "collection:nycmarriageindex",
+       "description": ""
+      },
+      {
+       "key": "fl[]",
+       "value": "identifier",
+       "description": ""
+      },
+      {
+       "key": "fl[]",
+       "value": "title",
+       "description": ""
+      },
+      {
+       "key": "rows",
+       "value": "300",
+       "description": ""
+      },
+      {
+       "key": "output",
+       "value": "json",
+       "description": ""
+      }
+     ]
+    },
+    "description": "One item per borough and year, e.g. NYC_Marriage_Index_Brooklyn_1916."
+   },
+   "response": []
+  },
+  {
+   "name": "IA – item metadata",
+   "request": {
+    "method": "GET",
+    "header": [],
+    "url": {
+     "raw": "{{ia}}/metadata/{{item}}",
+     "host": [
+      "{{ia}}"
+     ],
+     "path": [
+      "metadata",
+      "{{item}}"
+     ],
+     "query": []
+    },
+    "description": "Description (which microfilm roll), files, server."
+   },
+   "response": []
+  },
+  {
+   "name": "IIIF – manifest (page list)",
+   "request": {
+    "method": "GET",
+    "header": [],
+    "url": {
+     "raw": "{{iiif}}/iiif/3/{{item}}/manifest.json",
+     "host": [
+      "{{iiif}}"
+     ],
+     "path": [
+      "iiif",
+      "3",
+      "{{item}}",
+      "manifest.json"
+     ],
+     "query": []
+    },
+    "description": "items[n] is page n (0-based). items[n].items[0].items[0].body.id is the image URL; strip /full/... to get the image service base."
+   },
+   "response": []
+  },
+  {
+   "name": "IIIF – page image, cropped to the name columns",
+   "request": {
+    "method": "GET",
+    "header": [],
+    "url": {
+     "raw": "{{iiif}}/image/iiif/3/{{item}}%2F<file>%2F<page>/pct:13,10,30,80/700,/0/default.jpg",
+     "host": [
+      "{{iiif}}"
+     ],
+     "path": [
+      "image",
+      "iiif",
+      "3",
+      "{{item}}%2F<file>%2F<page>",
+      "pct:13,10,30,80",
+      "700,",
+      "0",
+      "default.jpg"
+     ],
+     "query": []
+    },
+    "description": "Replace the path with the service base from the manifest. Region pct:x,y,w,h; size 700, (width). Use /full/1400,/0/default.jpg for the whole page."
+   },
+   "response": []
+  }
+ ]
+}
